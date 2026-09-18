@@ -1,0 +1,5 @@
+[
+  "app/tests/test_auth.py::test_auth",
+  "app/tests/test_auth.py::test_auth_invalid_token",
+  "app/tests/test_auth.py::test_auth_valid_token"
+]

@@ -1,6 +1,6 @@
 # LORE Core — Build Progress
 
-## Status: CP-1 done, starting CP-2 & CP-3 (Rebuild Phase 1)
+## Status: CP-3 done, ready for Phase 2 (CP-4 & CP-5)
 ## Checkpoint log
 | CP | Name | Status | Date | Commit | Notes |
 |----|------|--------|------|--------|-------|
