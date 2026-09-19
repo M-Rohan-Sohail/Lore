@@ -2,7 +2,7 @@ import uuid
 import datetime
 from sqlalchemy import String, Integer, Boolean, JSON, DateTime, ForeignKey, Date, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy.dialects.postgresql import ARRAY # left for backward compat if needed
 from app.db.base import Base
 
 class Quest(Base):
@@ -56,7 +56,7 @@ class QuestTemplate(Base):
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     category: Mapped[str] = mapped_column(String)
     difficulty: Mapped[str] = mapped_column(String)
-    class_affinity: Mapped[list[str] | None] = mapped_column(ARRAY(String), nullable=True)
+    class_affinity: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
     title_tpl: Mapped[str] = mapped_column(String)
     active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), default=datetime.datetime.now(datetime.timezone.utc))
