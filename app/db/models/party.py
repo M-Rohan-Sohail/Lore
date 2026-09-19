@@ -10,6 +10,7 @@ class Party(Base):
     name: Mapped[str] = mapped_column(String)
     lead_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("profiles.id", ondelete="SET NULL"), nullable=True)
     invite_code: Mapped[str] = mapped_column(String, default=generate_short_code)
+    member_count: Mapped[int] = mapped_column(Integer, default=1)
     invite_expires_at: Mapped[datetime.datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     archived_at: Mapped[datetime.datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), default=datetime.datetime.now(datetime.timezone.utc))

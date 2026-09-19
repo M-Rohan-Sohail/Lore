@@ -11,8 +11,14 @@
   "app/tests/test_moderation.py::test_input_filter_blocks_bad_words",
   "app/tests/test_moderation.py::test_output_scan_causes_failover",
   "app/tests/test_moderation.py::test_sensitive_routing_adds_framing",
+  "app/tests/test_party.py::test_concurrent_join_race",
+  "app/tests/test_party.py::test_lead_transfer_on_leave",
+  "app/tests/test_party_recap.py::test_party_recap_leak",
   "app/tests/test_progression.py::test_level_curve",
   "app/tests/test_progression.py::test_streak_vectors",
   "app/tests/test_quests.py::test_complete_quest_idempotent",
-  "app/tests/test_quests.py::test_complete_quest_xp_cap"
+  "app/tests/test_quests.py::test_complete_quest_xp_cap",
+  "app/tests/test_recaps.py::test_quiet_week",
+  "app/tests/test_recaps.py::test_recap_job_poison_pill",
+  "app/tests/test_recaps.py::test_regenerate_pins_stats"
 ]
