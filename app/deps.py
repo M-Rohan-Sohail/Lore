@@ -4,9 +4,10 @@ from fastapi import Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.dialects.postgresql import insert
 from app.config import settings
 from app.db.session import get_db
-from app.db.models.accounts import AuthSession
+from app.db.models.accounts import AuthSession, Profile
 from app.core.errors import AppException
 
 security = HTTPBearer()
@@ -30,6 +31,7 @@ async def get_current_user(
 
     user_id_str = payload.get("sub")
     session_id = payload.get("session_id")
+    email = payload.get("email")
     
     if not user_id_str or not session_id:
         raise AppException(code="E_UNAUTHORIZED", message="Invalid token payload", retryable=False)
@@ -40,6 +42,17 @@ async def get_current_user(
     revoked = await session.scalar(select(AuthSession).where(AuthSession.id == uuid.UUID(session_id)))
     if revoked:
         raise AppException(code="E_UNAUTHORIZED", message="Session revoked", retryable=False)
+        
+    # Upsert Profile with email
+    stmt = insert(Profile).values(
+        id=user_id,
+        email=email
+    ).on_conflict_do_update(
+        index_elements=['id'],
+        set_={"email": email}
+    )
+    await session.execute(stmt)
+    await session.commit()
         
     return user_id
 
