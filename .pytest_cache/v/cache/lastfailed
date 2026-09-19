@@ -1,4 +1,3 @@
 {
-  "app/tests/test_cards.py::TestClient": true,
-  "app/tests/test_party.py::test_lead_transfer_on_leave": true
+  "app/tests/test_cards.py::TestClient": true
 }

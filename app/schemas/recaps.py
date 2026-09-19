@@ -19,3 +19,7 @@ class RecapResponse(BaseModel):
     degraded_level: str
     episode_number: int | None
     regen_count: int
+
+class LatestRecapResponse(BaseModel):
+    recap: RecapResponse | None
+    show_invite_nudge: bool

@@ -88,3 +88,14 @@ async def test_card_enumeration_and_revocation(db_session: AsyncSession, user_pr
     with pytest.raises(AppException) as exc:
         await resolve_and_render_card(db_session, token)
     assert exc.value.code == "E_NOT_FOUND"
+
+@pytest.mark.asyncio
+async def test_card_referral_link(db_session: AsyncSession, user_profile: Profile):
+    from app.services.card_templates import build_payload
+    # Test that the referral link is included in the raw HTML payload built for rendering
+    html = build_payload("character", {"display_name": "Hero"}, user_profile.referral_code)
+    expected_url = f"lore.app/j/{user_profile.referral_code}"
+    assert expected_url in html
+    
+    html = build_payload("weekly_recap", {"display_name": "Hero"}, user_profile.referral_code)
+    assert expected_url in html

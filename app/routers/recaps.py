@@ -5,9 +5,10 @@ import uuid
 import datetime
 from app.db.session import get_db
 from app.db.models.recaps import Recap, RecapJob
-from app.schemas.recaps import RecapResponse
+from app.schemas.recaps import RecapResponse, LatestRecapResponse
 from app.deps import get_current_user
 from app.core.envelope import success
+from app.services.growth import maybe_show_invite_nudge
 
 router = APIRouter(prefix="/v1/recaps", tags=["recaps"])
 
@@ -31,6 +32,38 @@ async def list_recaps(
         "episode_number": r.episode_number,
         "regen_count": r.regen_count
     } for r in recaps])
+
+@router.get("/latest", response_model=LatestRecapResponse)
+async def get_latest_recap(
+    user_id: uuid.UUID = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    stmt = select(Recap).where(Recap.owner_id == user_id, Recap.scope == "user").order_by(Recap.week_start.desc()).limit(1)
+    result = await db.execute(stmt)
+    recap = result.scalar_one_or_none()
+    
+    show_nudge = False
+    if recap:
+        show_nudge = await maybe_show_invite_nudge(db, user_id)
+        
+    recap_data = None
+    if recap:
+        recap_data = {
+            "id": recap.id,
+            "scope": recap.scope,
+            "owner_id": recap.owner_id,
+            "week_start": recap.week_start,
+            "payload": recap.payload,
+            "provider": recap.provider,
+            "degraded_level": recap.degraded_level,
+            "episode_number": recap.episode_number,
+            "regen_count": recap.regen_count
+        }
+        
+    return success(LatestRecapResponse(
+        recap=recap_data,
+        show_invite_nudge=show_nudge
+    ))
 
 @router.post("/trigger_job")
 async def trigger_recap_job(

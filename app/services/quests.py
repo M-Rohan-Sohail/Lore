@@ -7,6 +7,7 @@ from app.db.models.accounts import Profile
 from app.services.progression import calculate_streak_update, XP_PER_QUEST, MAX_QUESTS_XP_PER_DAY
 from app.core.errors import AppException
 from app.core.analytics import track_event
+from app.services.growth import maybe_grant_founding_player
 
 async def complete_quest(
     db: AsyncSession,
@@ -81,6 +82,8 @@ async def complete_quest(
             meta={"xp_delta": xp_awarded}
         )
         db.add(se)
+        
+    await maybe_grant_founding_player(db, user_id)
         
     await db.commit()
     
