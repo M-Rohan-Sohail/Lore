@@ -1,5 +1,11 @@
 [
+  "app/tests/test_ai_gateway.py::test_gateway_all_down",
+  "app/tests/test_ai_gateway.py::test_gateway_bad_request_no_failover",
+  "app/tests/test_ai_gateway.py::test_gateway_failover_success",
   "app/tests/test_auth.py::test_auth",
   "app/tests/test_auth.py::test_auth_invalid_token",
-  "app/tests/test_auth.py::test_auth_valid_token"
+  "app/tests/test_auth.py::test_auth_valid_token",
+  "app/tests/test_moderation.py::test_input_filter_blocks_bad_words",
+  "app/tests/test_moderation.py::test_output_scan_causes_failover",
+  "app/tests/test_moderation.py::test_sensitive_routing_adds_framing"
 ]
