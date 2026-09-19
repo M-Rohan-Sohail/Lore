@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Header
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 import uuid
-from app.db.base import get_db
+from app.db.session import get_db
 from app.services.quests import complete_quest
 from app.deps import get_current_user
 from app.core.envelope import success

@@ -60,7 +60,7 @@ class NotificationPref(Base):
 class Entitlement(Base):
     __tablename__ = "entitlements"
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
-    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("profiles.id", ondelete="CASCADE"))
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("profiles.id", ondelete="CASCADE"), unique=True)
     plan: Mapped[str] = mapped_column(String) # free/plus
     status: Mapped[str] = mapped_column(String) # inactive/active/past_due
     current_period_end: Mapped[datetime.datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
@@ -78,15 +78,16 @@ class AuthSession(Base):
     CP-3 addition: tracks Supabase sessions directly instead of relying on the Admin API.
     """
     __tablename__ = "auth_sessions"
-    id: Mapped[uuid.UUID] = mapped_column(primary_key=True) # Usually the session_id from JWT
+    id: Mapped[str] = mapped_column(String, primary_key=True)
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("profiles.id", ondelete="CASCADE"))
+    refresh_token: Mapped[str | None] = mapped_column(String, nullable=True)
+    expires_at: Mapped[datetime.datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), default=datetime.datetime.now(datetime.timezone.utc))
+    updated_at: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), default=datetime.datetime.now(datetime.timezone.utc), onupdate=datetime.datetime.now(datetime.timezone.utc))
     revoked_at: Mapped[datetime.datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
 class DeletedAccount(Base):
-    """
-    CP-14 addition: tombstone table to prevent re-registration or resurrection with old tokens.
-    """
     __tablename__ = "deleted_accounts"
     user_id: Mapped[uuid.UUID] = mapped_column(primary_key=True)
     deleted_at: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), default=datetime.datetime.now(datetime.timezone.utc))
+    reason: Mapped[str | None] = mapped_column(String, nullable=True)

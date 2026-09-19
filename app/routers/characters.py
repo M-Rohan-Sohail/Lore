@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 import uuid
-from app.db.base import get_db
+from app.db.session import get_db
 from app.schemas.characters import QuizSubmission, CharacterResponse
 from app.services.characters import process_quiz
 from app.deps import get_current_user

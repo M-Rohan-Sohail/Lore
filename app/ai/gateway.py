@@ -8,9 +8,16 @@ from app.moderation.input_filter import check_input
 from app.moderation.sensitive_router import requires_sensitive_handling
 from app.moderation.output_scan import scan_output
 
+from app.db.models.accounts import Profile
+
 logger = logging.getLogger(__name__)
 
 async def narrate(request: AIRequest, db: AsyncSession) -> AIResponse:
+    profile = await db.get(Profile, request.user_id)
+    if profile and not profile.ai_personalization:
+        # Strip out any personalization
+        request.system_prompt += "\n\n[USER OPTED OUT OF AI PERSONALIZATION. Provide a generic, unpersonalized response.]"
+        
     if not check_input(request.user_prompt):
         raise AppException(code="E_MODERATION_BLOCKED", message="Input violates moderation policies", retryable=False)
         

@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 import uuid
 import datetime
-from app.db.base import get_db
+from app.db.session import get_db
 from app.db.models.recaps import Recap, RecapJob
 from app.schemas.recaps import RecapResponse
 from app.deps import get_current_user

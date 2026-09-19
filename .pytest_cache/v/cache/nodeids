@@ -6,6 +6,8 @@
   "app/tests/test_auth.py::test_auth",
   "app/tests/test_auth.py::test_auth_invalid_token",
   "app/tests/test_auth.py::test_auth_valid_token",
+  "app/tests/test_billing.py::test_billing_webhook_lifecycle",
+  "app/tests/test_billing.py::test_verify_stripe_signature",
   "app/tests/test_cards.py::test_card_enumeration_and_revocation",
   "app/tests/test_cards.py::test_card_mint_and_resolve",
   "app/tests/test_characters.py::test_process_quiz_fallback",
@@ -20,11 +22,17 @@
   "app/tests/test_party.py::test_concurrent_join_race",
   "app/tests/test_party.py::test_lead_transfer_on_leave",
   "app/tests/test_party_recap.py::test_party_recap_leak",
+  "app/tests/test_privacy.py::test_delete_user_account",
+  "app/tests/test_privacy.py::test_export_user_data",
   "app/tests/test_progression.py::test_level_curve",
   "app/tests/test_progression.py::test_streak_vectors",
   "app/tests/test_quests.py::test_complete_quest_idempotent",
   "app/tests/test_quests.py::test_complete_quest_xp_cap",
   "app/tests/test_recaps.py::test_quiet_week",
   "app/tests/test_recaps.py::test_recap_job_poison_pill",
-  "app/tests/test_recaps.py::test_regenerate_pins_stats"
+  "app/tests/test_recaps.py::test_regenerate_pins_stats",
+  "app/tests/test_settings.py::test_delete_account",
+  "app/tests/test_settings.py::test_export_data",
+  "app/tests/test_settings.py::test_get_settings",
+  "app/tests/test_settings.py::test_update_settings"
 ]

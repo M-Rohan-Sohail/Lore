@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 import uuid
-from app.db.base import get_db
+from app.db.session import get_db
 from app.services.party import create_party, join_party, leave_party
 from app.schemas.party import PartyCreate, PartyResponse
 from app.deps import get_current_user

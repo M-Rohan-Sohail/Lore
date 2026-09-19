@@ -7,7 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
 from app.config import settings
 from app.db.session import get_db
-from app.db.models.accounts import AuthSession, Profile
+from app.db.models.accounts import AuthSession, Profile, DeletedAccount
 from app.core.errors import AppException
 
 security = HTTPBearer()
@@ -39,9 +39,14 @@ async def get_current_user(
     user_id = uuid.UUID(user_id_str)
     
     # Check if session is revoked
-    revoked = await session.scalar(select(AuthSession).where(AuthSession.id == uuid.UUID(session_id)))
+    revoked = await session.scalar(select(AuthSession).where(AuthSession.id == session_id, AuthSession.revoked_at.isnot(None)))
     if revoked:
         raise AppException(code="E_UNAUTHORIZED", message="Session revoked", retryable=False)
+        
+    # Check if account is deleted
+    deleted = await session.scalar(select(DeletedAccount).where(DeletedAccount.user_id == user_id))
+    if deleted:
+        raise AppException(code="E_ACCOUNT_DELETED", message="Account has been deleted", retryable=False)
         
     # Upsert Profile with email
     stmt = insert(Profile).values(
