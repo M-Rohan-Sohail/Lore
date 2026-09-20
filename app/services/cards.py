@@ -74,6 +74,9 @@ async def mint_share_token(
     session.add(st)
     await session.commit()
     
+    from app.core.analytics import track_card_shared
+    await track_card_shared(user_id, kind.value, artifact_id)
+    
     return raw_token, expires_at
 
 async def revoke_share_token(session: AsyncSession, user_id: uuid.UUID, raw_token: str) -> None:

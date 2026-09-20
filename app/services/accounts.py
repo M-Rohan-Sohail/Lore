@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import update
 from app.db.models.accounts import Profile
 from app.schemas.accounts import OnboardingRequest
-from app.core.analytics import track_event
+from app.core.analytics import track_event, track_sign_up
 
 async def complete_onboarding(db: AsyncSession, user_id: uuid.UUID, data: OnboardingRequest) -> bool:
     try:
@@ -32,5 +32,8 @@ async def complete_onboarding(db: AsyncSession, user_id: uuid.UUID, data: Onboar
         "age_gate_blocked": age_gate_blocked,
         "tz": data.tz
     })
+    
+    if not age_gate_blocked:
+        await track_sign_up(user_id)
     
     return age_gate_blocked

@@ -55,6 +55,7 @@ async def generate_user_recap(db: AsyncSession, user_id: uuid.UUID, week_start: 
     existing = await db.scalar(stmt)
     
     if existing and not force_regen:
+        from app.core.analytics import track_recap_generated
         return existing
         
     deltas = await calculate_deltas(db, user_id, week_start)
@@ -118,6 +119,8 @@ async def generate_user_recap(db: AsyncSession, user_id: uuid.UUID, week_start: 
         existing.provider = provider
         existing.degraded_level = degraded
         existing.regen_count += 1
+        from app.core.analytics import track_recap_generated
+        await track_recap_generated(existing.owner_id, existing.id, existing.scope, existing.provider, existing.degraded_level)
         return existing
     else:
         new_recap = Recap(
@@ -130,7 +133,9 @@ async def generate_user_recap(db: AsyncSession, user_id: uuid.UUID, week_start: 
             episode_number=episode_number,
             regen_count=0
         )
-        db.add(new_recap)
+        await db.flush()
+        from app.core.analytics import track_recap_generated
+        await track_recap_generated(new_recap.owner_id, new_recap.id, new_recap.scope, new_recap.provider, new_recap.degraded_level)
         return new_recap
 
 async def generate_party_recap(db: AsyncSession, party_id: uuid.UUID, week_start: datetime.date, force_regen: bool = False):
@@ -141,6 +146,7 @@ async def generate_party_recap(db: AsyncSession, party_id: uuid.UUID, week_start
     )
     existing = await db.scalar(stmt)
     if existing and not force_regen:
+        from app.core.analytics import track_recap_generated
         return existing
         
     mem_stmt = select(PartyMember.user_id).where(PartyMember.party_id == party_id)
@@ -206,6 +212,8 @@ async def generate_party_recap(db: AsyncSession, party_id: uuid.UUID, week_start
         existing.provider = provider
         existing.degraded_level = degraded
         existing.regen_count += 1
+        from app.core.analytics import track_recap_generated
+        await track_recap_generated(existing.owner_id, existing.id, existing.scope, existing.provider, existing.degraded_level)
         return existing
     else:
         new_recap = Recap(
@@ -218,5 +226,7 @@ async def generate_party_recap(db: AsyncSession, party_id: uuid.UUID, week_start
             episode_number=episode_number,
             regen_count=0
         )
-        db.add(new_recap)
+        await db.flush()
+        from app.core.analytics import track_recap_generated
+        await track_recap_generated(new_recap.owner_id, new_recap.id, new_recap.scope, new_recap.provider, new_recap.degraded_level)
         return new_recap

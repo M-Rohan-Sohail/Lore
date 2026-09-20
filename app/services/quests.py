@@ -6,7 +6,7 @@ from app.db.models.quests import Quest, QuestLog, StreakEvent
 from app.db.models.accounts import Profile
 from app.services.progression import calculate_streak_update, XP_PER_QUEST, MAX_QUESTS_XP_PER_DAY
 from app.core.errors import AppException
-from app.core.analytics import track_event
+from app.core.analytics import track_event, track_quest_completed
 from app.services.growth import maybe_grant_founding_player
 
 async def complete_quest(
@@ -87,11 +87,10 @@ async def complete_quest(
         
     await db.commit()
     
-    await track_event(user_id, "quest_completed", {
-        "xp_awarded": xp_awarded,
-        "new_streak": new_streak,
-        "event_type": event_type
-    })
+    from app.db.models.quests import Quest
+    quest_obj = await db.get(Quest, quest_id)
+    quest_title = quest_obj.title if quest_obj else "Unknown"
+    await track_quest_completed(user_id, quest_id, quest_title)
     
     return {
         "xp_awarded": xp_awarded,

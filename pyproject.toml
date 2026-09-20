@@ -17,6 +17,8 @@ dependencies = [
     "groq>=0.37",
     "openai>=2.54",
     "posthog>=5.4",
+    "sentry-sdk>=2.14",
+    "python-json-logger>=2.0",
     "playwright>=1.62",
     "aioapns>=4.0",
 ]

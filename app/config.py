@@ -23,6 +23,10 @@ class Settings(BaseSettings):
     APNS_TOPIC: str = ""
     APNS_USE_SANDBOX: bool = False
     RESEND_API_KEY: str = ""
+    
+    # Backups
+    BACKUP_PASSPHRASE: str = "changeme"
+    BACKUP_STORAGE_PATH: str = "./backups"
     RESEND_FROM_EMAIL: str = "narrator@lore.app"
     
     # Billing
