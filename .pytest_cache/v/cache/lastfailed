@@ -1,4 +1,10 @@
 {
   "app/tests/test_cards.py::TestClient": true,
-  "app/tests/test_notifications.py::TestClient": true
+  "app/tests/test_notifications.py::TestClient": true,
+  "app/tests/test_idor_suite.py::test_quest_reshuffle_not_owner": true,
+  "app/tests/test_idor_suite.py::test_recap_regenerate_not_owner": true,
+  "app/tests/test_idor_suite.py::test_party_detail_non_member": true,
+  "app/tests/test_idor_suite.py::test_party_weekly_quest_non_member": true,
+  "app/tests/test_idor_suite.py::test_party_leaderboard_non_member": true,
+  "app/tests/test_idor_suite.py::test_party_checkin_non_member": true
 }
