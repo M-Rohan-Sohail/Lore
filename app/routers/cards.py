@@ -18,6 +18,10 @@ async def share_card(
     current_user_id: uuid.UUID = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
+    from app.core.flags import get_flag
+    if not await get_flag(db, "sharing_enabled", default=True):
+        raise AppException(code="E_SHARING_DISABLED", message="Card sharing is currently disabled", retryable=False)
+        
     token, expires_at = await mint_share_token(
         session=db,
         user_id=current_user_id,

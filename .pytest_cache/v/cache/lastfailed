@@ -1,3 +1,4 @@
 {
-  "app/tests/test_cards.py::TestClient": true
+  "app/tests/test_cards.py::TestClient": true,
+  "app/tests/test_notifications.py::TestClient": true
 }

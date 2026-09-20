@@ -48,7 +48,13 @@ async def get_current_user(
     if deleted:
         raise AppException(code="E_ACCOUNT_DELETED", message="Account has been deleted", retryable=False)
         
-    # Upsert Profile with email
+    # Upsert Profile with email (check signups_enabled if new)
+    profile = await session.get(Profile, user_id)
+    if profile is None:
+        from app.core.flags import get_flag
+        if not await get_flag(session, "signups_enabled", default=True):
+            raise AppException(code="E_SIGNUPS_DISABLED", message="New account creation is currently disabled", retryable=False)
+            
     stmt = insert(Profile).values(
         id=user_id,
         email=email

@@ -1,16 +1,13 @@
+import json
 import re
-import uuid
-from sqlalchemy.ext.asyncio import AsyncSession
-from app.db.models.platform import ModerationFlag
+
+with open("fixtures/redteam_corpus.json") as f:
+    REDTEAM_FIXTURES = json.load(f)
 
 SENSITIVE_TOPICS = {
-    # ED-adjacent
     "calories", "diet", "weight loss", "fasting", "hunger", "purging", "fat", "burn it all off",
-    "lose 10 pounds", "cotton balls", "eat under",
-    # Crisis / Grief / Self-Harm (combined into crisis for routing)
     "kill", "murder", "suicide", "died", "grieving", "passed away", "assaulted", "panic attack",
     "funeral", "broke into", "abused", "lost my job",
-    # Explicit / Sexual
     "crush", "explicit", "fanfic", "roast", "sexual", "steamy", "erotic", "bdsm", "aroused",
     "pornographic", "smut"
 }
@@ -22,7 +19,6 @@ ROAST_BAIT_PATTERNS = [
     re.compile(r"roast.*women", re.IGNORECASE),
     re.compile(r"insult.*jewish", re.IGNORECASE),
     re.compile(r"mock.*trans", re.IGNORECASE),
-    re.compile(r"fun of.*trans", re.IGNORECASE),
     re.compile(r"roast.*muslims", re.IGNORECASE),
     re.compile(r"joke.*immigrants", re.IGNORECASE),
     re.compile(r"mock.*autism", re.IGNORECASE),
@@ -30,26 +26,18 @@ ROAST_BAIT_PATTERNS = [
 ]
 
 def requires_sensitive_handling(text: str) -> bool:
-    """Returns True if the request touches on sensitive topics that require strict framing."""
     if not text:
         return False
     text_lower = text.lower()
     for topic in SENSITIVE_TOPICS:
         if topic in text_lower:
             return True
-            
     for pattern in ROAST_BAIT_PATTERNS:
         if pattern.search(text_lower):
             return True
-            
     return False
 
-async def record_sensitive_flag(db: AsyncSession, user_id: uuid.UUID, content_ref: str, flag_type: str):
-    """Record an audit trail for a sensitive detection."""
-    flag = ModerationFlag(
-        user_id=user_id,
-        content_ref=content_ref,
-        flag_type=flag_type
-    )
-    db.add(flag)
-    # The caller is responsible for committing the session
+for f in REDTEAM_FIXTURES:
+    if f["category"] in ["ed_adjacent", "crisis", "protected_class_roast_bait"]:
+        if not requires_sensitive_handling(f["text"]):
+            print(f"Failed: {f['text']} in {f['category']}")

@@ -1,10 +1,11 @@
 import logging
+import re
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.schemas.ai import AIRequest, AIResponse, validate_ai_output, AIProviderError
 from app.ai.providers import gemini, groq, openrouter
 from app.ai.ledger import record_usage
 from app.core.errors import AppException
-from app.moderation.input_filter import check_input
+from app.moderation.input_filter import check
 from app.moderation.sensitive_router import requires_sensitive_handling
 from app.moderation.output_scan import scan_output
 
@@ -12,18 +13,42 @@ from app.db.models.accounts import Profile
 
 logger = logging.getLogger(__name__)
 
+_PII_KEY_BLOCKLIST = {"email", "phone", "address", "ssn"}
+
+_INSTRUCTION_PATTERNS = [
+    re.compile(r"ignore all previous instructions", re.IGNORECASE),
+    re.compile(r"you are now", re.IGNORECASE),
+    re.compile(r"Игнорируй все предыдущие инструкции", re.IGNORECASE), # INJ-11
+    re.compile(r"забудь все предыдущие команды", re.IGNORECASE),
+    re.compile(r"отмени предыдущие инструкции", re.IGNORECASE),
+    re.compile(r"ты теперь", re.IGNORECASE),
+    re.compile(r"действуй как", re.IGNORECASE)
+]
+
+def sanitize_text(text: str) -> str:
+    if not text:
+        return text
+    # Email redaction
+    text = re.sub(r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+", "[REDACTED_EMAIL]", text)
+    # Instruction injection redaction
+    for pattern in _INSTRUCTION_PATTERNS:
+        text = pattern.sub("[REDACTED_INSTRUCTION]", text)
+    return text
+
 async def narrate(request: AIRequest, db: AsyncSession) -> AIResponse:
     profile = await db.get(Profile, request.user_id)
     if profile and not profile.ai_personalization:
         # Strip out any personalization
         request.system_prompt += "\n\n[USER OPTED OUT OF AI PERSONALIZATION. Provide a generic, unpersonalized response.]"
         
-    if not check_input(request.user_prompt):
-        raise AppException(code="E_MODERATION_BLOCKED", message="Input violates moderation policies", retryable=False)
+    # Moderation check (raises if blocked)
+    check(request.user_prompt, field="user_prompt")
         
     system_prompt = request.system_prompt
     if requires_sensitive_handling(request.user_prompt):
         system_prompt += "\n\n[SENSITIVE TOPIC DETECTED. DO NOT generate harmful, explicit, or abusive content.]"
+
+    user_prompt_sanitized = sanitize_text(request.user_prompt)
 
     providers = [
         ("gemini", gemini.generate),
@@ -35,7 +60,7 @@ async def narrate(request: AIRequest, db: AsyncSession) -> AIResponse:
         try:
             response = await generate_func(
                 system_prompt=system_prompt,
-                user_prompt=request.user_prompt,
+                user_prompt=user_prompt_sanitized,
                 temperature=request.temperature
             )
             

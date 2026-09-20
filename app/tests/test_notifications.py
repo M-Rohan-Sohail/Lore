@@ -1,4 +1,5 @@
 import pytest
+from unittest.mock import patch
 import datetime
 import zoneinfo
 import uuid
@@ -46,8 +47,10 @@ async def user_profile(db_session):
     await db_session.commit()
     return profile
 
+@patch("app.services.notifications._is_quiet_hours", return_value=False)
+@patch("app.services.notifications.send_fcm_push", return_value=True)
 @pytest.mark.asyncio
-async def test_dispatch_honors_caps_and_logs(db_session: AsyncSession, user_profile: Profile):
+async def test_dispatch_honors_caps_and_logs(mock_fcm, mock_quiet, db_session: AsyncSession, user_profile: Profile):
     # Send one party_join
     await dispatch_notification(
         session=db_session,
