@@ -72,10 +72,12 @@ async def test_lead_transfer_on_leave(db_session: AsyncSession):
     # u1 creates, u2 joins, u3 joins
     party = await create_party(db_session, u1, "Squad")
     
-    # Must wait a bit to ensure joined_at differs or mock it
     import time
+    from sqlalchemy import text
     await join_party(db_session, u2, party.invite_code)
-    await asyncio.sleep(0.1) # ensure joined_at sorting
+    # Ensure joined_at sorting by manipulating it directly with text
+    await db_session.execute(text("UPDATE party_members SET joined_at = '2020-01-01 00:00:00' WHERE user_id = :u2"), {"u2": str(u2)})
+    
     await join_party(db_session, u3, party.invite_code)
     
     # u1 leaves. u2 should be lead.
